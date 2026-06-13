@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>校园闲置交易平台 - 在售商品</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header .nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+        }
+
+        .goods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .goods-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .goods-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .goods-card .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .goods-card .description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .goods-card .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .goods-card .price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #e74c3c;
+        }
+
+        .goods-card .price span {
+            font-size: 14px;
+            font-weight: 400;
+            color: #999;
+            margin-left: 2px;
+        }
+
+        .goods-card .buy-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .goods-card .buy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .goods-card .buy-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-state {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .empty-state h3 {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            min-width: 360px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .modal p {
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .modal .btn-confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal .btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateX(120%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .user-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .user-info span {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 校园闲置交易平台</h1>
+            <div class="nav">
+                <span class="user-info">当前用户：<span id="currentUser">未登录</span> (<span id="currentRole">-</span>)</span>
+                <span id="publishBtn"></span>
+                <a href="login.html" class="btn btn-secondary" onclick="logout()">退出登录</a>
+                <a href="profile.html" class="btn btn-secondary">个人中心</a>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索商品..." onkeyup="handleSearch(event)">
+            <button class="btn btn-primary" onclick="searchGoods()">搜索</button>
+            <button class="btn btn-secondary" onclick="clearSearch()">重置</button>
+        </div>
+
+        <div id="goodsList" class="goods-grid"></div>
+
+        <div id="confirmModal" class="modal-overlay">
+            <div class="modal">
+                <h3>确认购买</h3>
+                <p id="modalContent">确定要购买这件商品吗？</p>
+                <div class="modal-footer">
+                    <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+                    <button class="btn btn-confirm" onclick="confirmBuy()">确认购买</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script>
+        const buyerId = localStorage.getItem("userId");
+        let pendingGoodsId = null;
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                searchGoods();
+            }
+        }
+
+        function searchGoods() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                loadGoodsList();
+                return;
+            }
+            fetch(`/goods/search?keyword=${encodeURIComponent(keyword)}`)
+            .then(res => res.json())
+            .then(goodsList => {
+                renderGoodsList(goodsList);
+            })
+            .catch(err => {
+                showToast('搜索失败：' + err.message, 'error');
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            loadGoodsList();
+        }
+
+        function loadGoodsList() {
+            fetch("/goods/list")
+            .then(res => res.json())
+            .then(goodsList => {
+                renderGoodsList(goodsList);
+            })
+            .catch(err => {
+                showToast('加载失败：' + err.message, 'error');
+            });
+        }
+
+        function renderGoodsList(goodsList) {
+            const container = document.getElementById("goodsList");
+            
+            if (!goodsList || goodsList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>暂无商品</h3>
+                        <p>没有找到匹配的商品</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            goodsList.forEach(goods => {
+                const card = document.createElement("div");
+                card.className = "goods-card";
+                card.innerHTML = `
+                    <div class="title">${goods.title}</div>
+                    <div class="description">${goods.description || '暂无描述'}</div>
+                    <div class="price-row">
+                        <div class="price">¥${goods.price}<span>元</span></div>
+                        <button class="buy-btn" onclick="openModal(${goods.id}, '${escapeHtml(goods.title)}', ${goods.price})">
+                            立即购买
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem("userId");
+            localStorage.removeItem("username");
+            showToast('已退出登录', 'success');
+            setTimeout(() => {
+                location.href = 'login.html';
+            }, 1000);
+        }
+
+        function openModal(goodsId, title, price) {
+            pendingGoodsId = goodsId;
+            document.getElementById('modalContent').innerHTML = 
+                `确定要购买 <strong>${title}</strong> 吗？<br>价格：<span style="color:#e74c3c;font-weight:bold">¥${price}</span>`;
+            document.getElementById('confirmModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+            pendingGoodsId = null;
+        }
+
+        function confirmBuy() {
+            if (!pendingGoodsId || !buyerId) {
+                closeModal();
+                return;
+            }
+
+            fetch(`/order/create?goodsId=${pendingGoodsId}&buyerId=${parseInt(buyerId)}`, {
+                method: "POST"
+            })
+            .then(res => res.text())
+            .then(msg => {
+                closeModal();
+                if (msg === "success") {
+                    showToast('下单成功！', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast('订单创建失败：' + msg, 'error');
+                }
+            })
+            .catch(err => {
+                closeModal();
+                showToast('请求异常：' + err.message, 'error');
+            });
+        }
+
+        window.onload = function() {
+            const currentUserEl = document.getElementById('currentUser');
+            const currentRoleEl = document.getElementById('currentRole');
+            const publishBtnEl = document.getElementById('publishBtn');
+            const username = localStorage.getItem('username');
+            const role = localStorage.getItem('role');
+            
+            if (username) {
+                currentUserEl.textContent = username;
+            } else if (buyerId) {
+                currentUserEl.textContent = '用户ID: ' + buyerId;
+            }
+
+            // 根据角色显示不同信息
+            const roleNames = {
+                'both': '买卖皆可',
+                'seller': '卖家',
+                'buyer': '买家'
+            };
+            currentRoleEl.textContent = roleNames[role] || '-';
+
+            // 根据角色显示发布商品按钮
+            if (role === 'both' || role === 'seller') {
+                publishBtnEl.innerHTML = '<a href="publish.html" class="btn btn-primary">发布商品</a>';
+            } else {
+                publishBtnEl.innerHTML = '<span style="color:#999;font-size:14px;">仅限卖家发布商品</span>';
+            }
+
+            loadGoodsList();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

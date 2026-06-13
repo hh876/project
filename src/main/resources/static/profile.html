@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 校园闲置交易平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .header .nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2ecc71;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+
+        .info h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .order-list, .goods-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .order-card, .goods-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .order-header, .goods-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .order-id, .goods-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .order-status, .goods-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-sold {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-onsale {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .order-body, .goods-body {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .order-footer, .goods-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e74c3c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateX(120%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .user-info {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 个人中心</h1>
+            <div class="nav">
+                <span class="user-info">当前用户：<span id="currentUser">未登录</span></span>
+                <a href="goods.html" class="btn btn-secondary">商品列表</a>
+                <a href="login.html" class="btn btn-secondary" onclick="logout()">退出登录</a>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-info">
+                <div class="avatar">👤</div>
+                <div class="info">
+                    <h2 id="username">未登录</h2>
+                    <p id="userId">用户ID：-</p>
+                    <p id="userRole">身份：-</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('orders')">我的订单</button>
+            <button class="tab" onclick="showTab('goods')">我的商品</button>
+            <button class="tab" onclick="showTab('sales')">我的销售</button>
+        </div>
+
+        <div id="ordersTab" class="tab-content active">
+            <div id="orderList" class="order-list">
+                <div class="empty-state">
+                    <h3>暂无订单</h3>
+                    <p>快去选购心仪的商品吧！</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="goodsTab" class="tab-content">
+            <div id="goodsList" class="goods-list">
+                <div class="empty-state">
+                    <h3>暂无发布的商品</h3>
+                    <p><a href="publish.html" class="btn btn-primary">去发布商品</a></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="salesTab" class="tab-content">
+            <div id="salesList" class="order-list">
+                <div class="empty-state">
+                    <h3>暂无销售订单</h3>
+                    <p>发布商品后，买家购买会在这里显示</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const userId = localStorage.getItem("userId");
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem("userId");
+            localStorage.removeItem("username");
+            showToast('已退出登录', 'success');
+            setTimeout(() => {
+                location.href = 'login.html';
+            }, 1000);
+        }
+
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`.tab:nth-child(${tabName === 'orders' ? 1 : tabName === 'goods' ? 2 : 3})`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+
+            if (tabName === 'orders') {
+                loadOrders();
+            } else if (tabName === 'goods') {
+                loadMyGoods();
+            } else if (tabName === 'sales') {
+                loadSales();
+            }
+        }
+
+        function loadOrders() {
+            if (!userId) return;
+            fetch(`/order/list?userId=${parseInt(userId)}`)
+            .then(res => res.json())
+            .then(orders => {
+                const container = document.getElementById('orderList');
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>暂无订单</h3>
+                            <p>快去选购心仪的商品吧！</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = '';
+                orders.forEach(order => {
+                    const card = document.createElement('div');
+                    card.className = 'order-card';
+                    card.innerHTML = `
+                        <div class="order-header">
+                            <span class="order-id">订单号：${order.id}</span>
+                            <span class="order-status ${getStatusClass(order.status)}">${getStatusText(order.status)}</span>
+                        </div>
+                        <div class="order-body">
+                            <p>商品：${order.goodsTitle}</p>
+                            <p>购买时间：${order.createTime}</p>
+                        </div>
+                        <div class="order-footer">
+                            <span class="price">¥${order.price}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(err => {
+                showToast('加载订单失败：' + err.message, 'error');
+            });
+        }
+
+        function loadMyGoods() {
+            if (!userId) return;
+            fetch(`/goods/my?userId=${parseInt(userId)}`)
+            .then(res => res.json())
+            .then(goodsList => {
+                const container = document.getElementById('goodsList');
+                if (!goodsList || goodsList.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>暂无发布的商品</h3>
+                            <p><a href="publish.html" class="btn btn-primary">去发布商品</a></p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = '';
+                goodsList.forEach(goods => {
+                    const card = document.createElement('div');
+                    card.className = 'goods-card';
+                    card.innerHTML = `
+                        <div class="goods-header">
+                            <span class="goods-title">${goods.title}</span>
+                            <span class="goods-status ${goods.status === 0 ? 'status-onsale' : 'status-sold'}">${goods.status === 0 ? '在售' : '已售出'}</span>
+                        </div>
+                        <div class="goods-body">
+                            <p>${goods.description || '暂无描述'}</p>
+                        </div>
+                        <div class="goods-footer">
+                            <span class="price">¥${goods.price}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(err => {
+                showToast('加载商品失败：' + err.message, 'error');
+            });
+        }
+
+        function loadSales() {
+            if (!userId) return;
+            fetch(`/order/sales?userId=${parseInt(userId)}`)
+            .then(res => res.json())
+            .then(orders => {
+                const container = document.getElementById('salesList');
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>暂无销售订单</h3>
+                            <p>发布商品后，买家购买会在这里显示</p>
+                        </div>
+                    `;
+                    return;
+                }
+                container.innerHTML = '';
+                orders.forEach(order => {
+                    const card = document.createElement('div');
+                    card.className = 'order-card';
+                    card.innerHTML = `
+                        <div class="order-header">
+                            <span class="order-id">订单号：${order.id}</span>
+                            <span class="order-status ${getStatusClass(order.status)}">${getStatusText(order.status)}</span>
+                        </div>
+                        <div class="order-body">
+                            <p>商品：${order.goodsTitle}</p>
+                            <p>买家ID：${order.buyerId}</p>
+                            <p>下单时间：${order.createTime}</p>
+                        </div>
+                        <div class="order-footer">
+                            <span class="price">¥${order.price}</span>
+                            ${order.status === 0 ? `<button class="btn btn-success" onclick="confirmOrder(${order.id})">确认订单</button>` : ''}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(err => {
+                showToast('加载销售订单失败：' + err.message, 'error');
+            });
+        }
+
+        function confirmOrder(orderId) {
+            if (!userId) return;
+            fetch(`/order/confirm?orderId=${orderId}`, {
+                method: 'POST'
+            })
+            .then(res => res.text())
+            .then(msg => {
+                if (msg === 'success') {
+                    showToast('确认成功！', 'success');
+                    loadSales();
+                } else {
+                    showToast('确认失败：' + msg, 'error');
+                }
+            })
+            .catch(err => {
+                showToast('确认失败：' + err.message, 'error');
+            });
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 0: return 'status-pending';
+                case 1: return 'status-confirmed';
+                case 2: return 'status-completed';
+                default: return 'status-pending';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 0: return '待确认';
+                case 1: return '已确认';
+                case 2: return '已完成';
+                default: return '未知状态';
+            }
+        }
+
+        window.onload = function() {
+            const currentUserEl = document.getElementById('currentUser');
+            const usernameEl = document.getElementById('username');
+            const userIdEl = document.getElementById('userId');
+            const userRoleEl = document.getElementById('userRole');
+            const username = localStorage.getItem('username');
+            const role = localStorage.getItem('role');
+            
+            if (username) {
+                currentUserEl.textContent = username;
+                usernameEl.textContent = username;
+            } else if (userId) {
+                currentUserEl.textContent = '用户ID: ' + userId;
+                usernameEl.textContent = '用户ID: ' + userId;
+            }
+            
+            userIdEl.textContent = '用户ID：' + (userId || '-');
+            
+            // 显示角色信息
+            const roleNames = {
+                'both': '买卖皆可',
+                'seller': '卖家',
+                'buyer': '买家'
+            };
+            userRoleEl.textContent = '身份：' + (roleNames[role] || '-');
+            
+            loadOrders();
+        }
+    </script>
+</body>
+</html>

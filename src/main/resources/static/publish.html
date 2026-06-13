@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>校园闲置交易平台 - 发布商品</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .header .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .header .back-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #fafafa;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #999;
+        }
+
+        .form-group .input-group {
+            position: relative;
+        }
+
+        .form-group .input-group input {
+            padding-left: 45px;
+        }
+
+        .form-group .input-group .prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-weight: 500;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateX(120%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .form-tips {
+            font-size: 13px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .price-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-info span {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 发布闲置商品</h1>
+            <a href="goods.html" class="back-link">
+                <span>←</span>
+                <span>返回列表</span>
+            </a>
+        </div>
+
+        <div class="form-group">
+            <label>商品标题</label>
+            <input type="text" id="title" placeholder="请输入商品标题，如：闲置笔记本电脑">
+            <div class="form-tips">简洁明了地描述你的商品</div>
+        </div>
+
+        <div class="form-group">
+            <label>商品描述</label>
+            <textarea id="desc" placeholder="详细描述商品的成色、使用情况、配件等信息..."></textarea>
+            <div class="form-tips">描述越详细，越容易吸引买家</div>
+        </div>
+
+        <div class="form-group">
+            <label>商品价格</label>
+            <div class="input-group">
+                <span class="prefix">¥</span>
+                <input type="number" id="price" placeholder="0.00" step="0.01">
+            </div>
+            <div class="form-tips">请输入合理的价格，支持小数</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="publish()">发布商品</button>
+        <button class="btn btn-secondary" onclick="resetForm()">重置表单</button>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const userId = localStorage.getItem("userId");
+        const userRole = localStorage.getItem("role");
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function resetForm() {
+            document.getElementById('title').value = '';
+            document.getElementById('desc').value = '';
+            document.getElementById('price').value = '';
+        }
+
+        function publish() {
+            if (!userId) {
+                showToast('请先登录！', 'error');
+                setTimeout(() => {
+                    location.href = 'login.html';
+                }, 1000);
+                return;
+            }
+
+            // 权限检查：只有卖家角色可以发布商品
+            if (userRole !== 'both' && userRole !== 'seller') {
+                showToast('只有卖家角色才能发布商品！', 'error');
+                return;
+            }
+
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('desc').value.trim();
+            const price = document.getElementById('price').value.trim();
+
+            if (!title) {
+                showToast('请输入商品标题', 'error');
+                return;
+            }
+            if (!description) {
+                showToast('请输入商品描述', 'error');
+                return;
+            }
+            if (!price || parseFloat(price) <= 0) {
+                showToast('请输入有效的价格', 'error');
+                return;
+            }
+
+            fetch("/goods/publish", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId: parseInt(userId),
+                    title: title,
+                    description: description,
+                    price: parseFloat(price)
+                })
+            })
+            .then(res => res.text())
+            .then(txt => {
+                if (txt.includes("成功")) {
+                    showToast('发布成功！', 'success');
+                    setTimeout(() => {
+                        location.href = 'goods.html';
+                    }, 1500);
+                } else {
+                    showToast('发布失败：' + txt, 'error');
+                }
+            })
+            .catch(err => {
+                showToast('发布失败：' + err.message, 'error');
+            });
+        }
+    </script>
+</body>
+</html>

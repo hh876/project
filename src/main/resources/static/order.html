@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>订单操作</title>
+</head>
+<body>
+<h2>订单管理</h2>
+<a href="goods.html">返回商品列表</a>
+<hr>
+订单号：<input type="text" id="orderNo"><br><br>
+<button onclick="pay()">支付订单</button>
+<button onclick="confirm()">确认收货</button>
+
+<script>
+  const baseUrl = "http://localhost:8082";
+  function pay(){
+      let no = document.getElementById("orderNo").value;
+      fetch(`${baseUrl}/order/pay?orderNo=${no}`,{method:"POST"})
+      .then(res=>res.text()).then(txt=>alert(txt));
+  }
+  function confirm(){
+      let no = document.getElementById("orderNo").value;
+      fetch(`${baseUrl}/order/confirm?orderNo=${no}`,{method:"POST"})
+      .then(res=>res.text()).then(txt=>alert(txt));
+  }
+</script>
+</body>
+</html>

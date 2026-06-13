@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>校园闲置交易平台 - 登录注册</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #999;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .forgot-link {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .forgot-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-link a:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+            transform: translateY(-50%);
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #999;
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .social-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .social-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .social-btn img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateX(120%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon input {
+            padding-right: 45px;
+        }
+
+        .input-icon .icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+
+        .role-select {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .role-option {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .role-option:hover {
+            border-color: #667eea;
+            background: #f8f6ff;
+        }
+
+        .role-option input[type="radio"] {
+            margin-right: 12px;
+            margin-top: 4px;
+            accent-color: #667eea;
+            transform: scale(1.2);
+        }
+
+        .role-option input[type="radio"]:checked + .role-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .role-option input[type="radio"]:checked ~ .role-desc {
+            color: #888;
+        }
+
+        .role-option:has(input:checked) {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        .role-label {
+            display: block;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .role-desc {
+            display: block;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🎓 校园闲置交易平台</h1>
+            <p>让闲置物品焕发新生</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('login')">登录</div>
+            <div class="tab" onclick="showTab('register')">注册</div>
+        </div>
+
+        <div id="loginForm" class="form-section active">
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="loginUser" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="loginPwd" placeholder="请输入密码">
+            </div>
+            <button class="btn btn-primary" onclick="login()">立即登录</button>
+            <div class="forgot-link">
+                <a href="#">忘记密码？</a>
+            </div>
+        </div>
+
+        <div id="registerForm" class="form-section">
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="regUser" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="regPwd" placeholder="请输入密码">
+            </div>
+            <div class="form-group">
+                <label>昵称</label>
+                <input type="text" id="regNick" placeholder="请输入昵称">
+            </div>
+            <div class="form-group">
+                <label>选择角色</label>
+                <div class="role-select">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="both" checked>
+                        <span class="role-label">🛒 买卖皆可</span>
+                        <span class="role-desc">可以发布商品，也可以购买商品</span>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="seller">
+                        <span class="role-label">📦 卖家</span>
+                        <span class="role-desc">主要发布商品进行销售</span>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="buyer">
+                        <span class="role-label">🛍️ 买家</span>
+                        <span class="role-desc">主要购买他人商品</span>
+                    </label>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="register()">立即注册</button>
+        </div>
+
+        <div class="divider">
+            <span>或者</span>
+        </div>
+
+        <div class="social-btns">
+            <button class="social-btn">
+                <span>📱</span>
+                <span>手机号登录</span>
+            </button>
+            <button class="social-btn">
+                <span>👤</span>
+                <span>校园账号</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const forms = document.querySelectorAll('.form-section');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            forms.forEach(form => form.classList.remove('active'));
+            
+            document.querySelector(`.tab:nth-child(${tabName === 'login' ? 1 : 2})`).classList.add('active');
+            document.getElementById(`${tabName}Form`).classList.add('active');
+        }
+
+        function register() {
+            const username = document.getElementById("regUser").value.trim();
+            const password = document.getElementById("regPwd").value.trim();
+            const nickname = document.getElementById("regNick").value.trim();
+            const role = document.querySelector('input[name="role"]:checked').value;
+
+            if (!username) {
+                showToast('请输入用户名', 'error');
+                return;
+            }
+            if (!password) {
+                showToast('请输入密码', 'error');
+                return;
+            }
+            if (!nickname) {
+                showToast('请输入昵称', 'error');
+                return;
+            }
+
+            const roleNames = {
+                'both': '买卖皆可',
+                'seller': '卖家',
+                'buyer': '买家'
+            };
+
+            fetch("/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, nickname, role })
+            })
+            .then(res => res.text())
+            .then(txt => {
+                if (txt.includes("成功")) {
+                    showToast(`注册成功！您是【${roleNames[role]}】，请登录`, 'success');
+                    setTimeout(() => {
+                        showTab('login');
+                    }, 1500);
+                } else {
+                    showToast(txt, 'error');
+                }
+            })
+            .catch(err => {
+                showToast('注册失败：' + err.message, 'error');
+            });
+        }
+
+        function login() {
+            const username = document.getElementById("loginUser").value.trim();
+            const password = document.getElementById("loginPwd").value.trim();
+
+            if (!username) {
+                showToast('请输入用户名', 'error');
+                return;
+            }
+            if (!password) {
+                showToast('请输入密码', 'error');
+                return;
+            }
+
+            fetch("/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem("userId", data.userId);
+                    localStorage.setItem("username", data.username);
+                    localStorage.setItem("role", data.role);
+                    
+                    const roleNames = {
+                        'both': '买卖皆可',
+                        'seller': '卖家',
+                        'buyer': '买家'
+                    };
+                    showToast(`登录成功！身份：${roleNames[data.role] || '未知'}`, 'success');
+                    setTimeout(() => {
+                        location.href = "goods.html";
+                    }, 1500);
+                } else {
+                    showToast(data.message || '登录失败', 'error');
+                }
+            })
+            .catch(err => {
+                showToast('登录失败：' + err.message, 'error');
+            });
+        }
+    </script>
+</body>
+</html>
