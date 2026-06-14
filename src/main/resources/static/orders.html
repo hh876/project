@@ -68,11 +68,11 @@
 
     <div class="container">
         <div class="tabs">
-            <button class="tab active" onclick="loadOrders(0)">全部</button>
-            <button class="tab" onclick="loadOrders(0)">待支付</button>
-            <button class="tab" onclick="loadOrders(1)">已支付</button>
-            <button class="tab" onclick="loadOrders(3)">已完成</button>
-            <button class="tab" onclick="loadOrders(2)">已取消</button>
+            <button class="tab active" onclick="loadOrders(0, this)">全部</button>
+            <button class="tab" onclick="loadOrders(0, this)">待支付</button>
+            <button class="tab" onclick="loadOrders(1, this)">已支付</button>
+            <button class="tab" onclick="loadOrders(3, this)">已完成</button>
+            <button class="tab" onclick="loadOrders(2, this)">已取消</button>
         </div>
 
         <div id="orderList">
@@ -108,7 +108,7 @@
             return 'status-' + status;
         }
 
-        async function loadOrders(status) {
+        async function loadOrders(status, btnElement) {
             if (!currentUserId) {
                 showToast('请先登录', 'error');
                 window.location.href = 'login.html';
@@ -125,7 +125,11 @@
                 let orders = await response.json();
                 
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                event.target.classList.add('active');
+                if (btnElement) {
+                    btnElement.classList.add('active');
+                } else {
+                    document.querySelectorAll('.tab')[0].classList.add('active');
+                }
                 
                 if (!orders || orders.length === 0) {
                     document.getElementById('orderList').innerHTML = `
