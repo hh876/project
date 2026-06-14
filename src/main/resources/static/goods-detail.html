@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>商品详情 - 校园闲置交易平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 30px; color: white; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-size: 20px; font-weight: bold; }
+        .nav { display: flex; gap: 20px; }
+        .nav a { color: white; text-decoration: none; padding: 5px 10px; }
+        .nav a:hover { background: rgba(255,255,255,0.2); border-radius: 5px; }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .detail-card { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .detail-content { display: flex; padding: 30px; }
+        .image-section { width: 45%; }
+        .image-box { width: 100%; height: 400px; background: #f8f8f8; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .image-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .image-box .placeholder { color: #999; font-size: 14px; }
+        
+        .info-section { width: 55%; padding-left: 30px; }
+        .price { font-size: 32px; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .category { display: inline-block; background: #667eea; color: white; padding: 3px 10px; border-radius: 5px; font-size: 12px; margin-bottom: 15px; }
+        .description { color: #666; line-height: 1.8; margin-bottom: 20px; }
+        
+        .stats { display: flex; gap: 30px; margin-bottom: 20px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #667eea; }
+        .stat-label { font-size: 12px; color: #999; }
+        
+        .seller-info { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .seller-header { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+        .seller-name { font-weight: bold; }
+        .seller-role { font-size: 12px; color: #999; }
+        
+        .actions { display: flex; gap: 15px; }
+        .btn { padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn:hover { opacity: 0.9; }
+        
+        .tabs { display: flex; border-bottom: 1px solid #eee; margin-top: 30px; }
+        .tab { padding: 15px 30px; cursor: pointer; font-weight: bold; color: #666; border-bottom: 2px solid transparent; }
+        .tab.active { color: #667eea; border-bottom-color: #667eea; }
+        
+        .tab-content { padding: 30px; }
+        .review-item { border-bottom: 1px solid #eee; padding: 20px 0; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .reviewer { font-weight: bold; }
+        .review-rating { color: #f39c12; }
+        .review-content { color: #666; line-height: 1.6; }
+        
+        .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: white; font-size: 14px; z-index: 9999; }
+        .toast-success { background: #27ae60; }
+        .toast-error { background: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🎓 校园闲置交易平台</div>
+            <div class="nav">
+                <a href="goods.html">首页</a>
+                <a href="publish.html">发布商品</a>
+                <a href="orders.html">我的订单</a>
+                <a href="profile.html">个人中心</a>
+                <a href="login.html" id="logoutBtn" style="display:none;">退出登录</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="detail-card" id="goodsDetail">
+            <div class="detail-content">
+                <div class="image-section">
+                    <div class="image-box" id="goodsImage">
+                        <span class="placeholder">📷 暂无图片</span>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <div class="price" id="goodsPrice"></div>
+                    <div class="title" id="goodsTitle"></div>
+                    <span class="category" id="goodsCategory"></span>
+                    <div class="description" id="goodsDescription"></div>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="favoriteCount">0</div>
+                            <div class="stat-label">收藏</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="reviewCount">0</div>
+                            <div class="stat-label">评价</div>
+                        </div>
+                    </div>
+                    
+                    <div class="seller-info">
+                        <div class="seller-header">
+                            <div class="avatar" id="sellerAvatar">👤</div>
+                            <div>
+                                <div class="seller-name" id="sellerName"></div>
+                                <div class="seller-role" id="sellerRole"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-secondary" onclick="toggleFavorite()">
+                            <span id="favoriteIcon">❤️</span> 收藏
+                        </button>
+                        <button class="btn btn-primary" onclick="buyGoods()">立即购买</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('reviews')">用户评价</div>
+                <div class="tab" onclick="showTab('detail')">商品详情</div>
+            </div>
+            
+            <div class="tab-content" id="reviews">
+                <div id="reviewList">暂无评价</div>
+            </div>
+            <div class="tab-content" id="detail" style="display:none;">
+                <h3>商品详情</h3>
+                <p id="detailContent">暂无详细描述</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let goodsId = getUrlParam('id');
+        let currentUserId = localStorage.getItem('userId');
+
+        function getUrlParam(name) {
+            let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+            let r = window.location.search.substr(1).match(reg);
+            return r ? decodeURIComponent(r[2]) : null;
+        }
+
+        function showToast(message, type = 'success') {
+            let toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        async function loadGoodsDetail() {
+            if (!goodsId) {
+                showToast('商品ID不能为空', 'error');
+                setTimeout(() => window.location.href = 'goods.html', 2000);
+                return;
+            }
+            
+            try {
+                let response = await fetch('/goods/detail/' + goodsId);
+                if (!response.ok) {
+                    throw new Error('HTTP error ' + response.status);
+                }
+                let goods = await response.json();
+                
+                if (!goods || !goods.id) {
+                    showToast('商品不存在', 'error');
+                    setTimeout(() => window.location.href = 'goods.html', 2000);
+                    return;
+                }
+                
+                document.getElementById('goodsTitle').textContent = goods.title;
+                document.getElementById('goodsPrice').textContent = '¥' + (goods.price || 0);
+                document.getElementById('goodsDescription').textContent = goods.description || '暂无描述';
+                document.getElementById('goodsCategory').textContent = goods.categoryName || '未分类';
+                
+                if (goods.imageUrl) {
+                    document.getElementById('goodsImage').innerHTML = `<img src="${goods.imageUrl}" alt="${goods.title}">`;
+                }
+                
+                // 加载卖家信息
+                let sellerResponse = await fetch('/user/get?id=' + goods.userId);
+                let seller = await sellerResponse.json();
+                document.getElementById('sellerName').textContent = seller.nickname || seller.username;
+                document.getElementById('sellerRole').textContent = seller.role === 'seller' ? '卖家' : seller.role === 'buyer' ? '买家' : '买卖皆可';
+                
+                // 加载收藏数和评价数
+                let favResponse = await fetch('/favorite/count?goodsId=' + goodsId);
+                let favData = await favResponse.json();
+                document.getElementById('favoriteCount').textContent = favData.count;
+                
+                let reviews = await loadReviews();
+                document.getElementById('reviewCount').textContent = reviews.length;
+                
+                // 检查是否已收藏
+                if (currentUserId) {
+                    let checkResponse = await fetch('/favorite/check?userId=' + currentUserId + '&goodsId=' + goodsId);
+                    let checkData = await checkResponse.json();
+                    if (checkData.isFavorite) {
+                        document.getElementById('favoriteIcon').textContent = '💔';
+                    }
+                }
+            } catch (err) {
+                showToast('加载商品详情失败: ' + err.message, 'error');
+            }
+        }
+
+        async function loadReviews() {
+            try {
+                let response = await fetch('/review/goods/' + goodsId);
+                let reviews = await response.json();
+                
+                if (reviews.length === 0) {
+                    document.getElementById('reviewList').innerHTML = '<p style="text-align:center;color:#999;">暂无评价</p>';
+                    return [];
+                }
+                
+                let html = reviews.map(r => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="reviewer">${r.buyerNickname || '匿名买家'}</span>
+                            <span class="review-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                        </div>
+                        <div class="review-content">${r.comment || '暂无评价内容'}</div>
+                    </div>
+                `).join('');
+                document.getElementById('reviewList').innerHTML = html;
+                return reviews;
+            } catch (err) {
+                return [];
+            }
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            event.target.classList.add('active');
+            document.getElementById(tabName).style.display = 'block';
+        }
+
+        async function toggleFavorite() {
+            if (!currentUserId) {
+                showToast('请先登录', 'error');
+                localStorage.setItem('redirectUrl', window.location.href);
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            let icon = document.getElementById('favoriteIcon');
+            if (icon.textContent === '❤️') {
+                // 添加收藏
+                let response = await fetch('/favorite/add?userId=' + currentUserId + '&goodsId=' + goodsId, { method: 'POST' });
+                let result = await response.text();
+                if (result === '收藏成功') {
+                    icon.textContent = '💔';
+                    showToast('收藏成功');
+                    let count = parseInt(document.getElementById('favoriteCount').textContent);
+                    document.getElementById('favoriteCount').textContent = count + 1;
+                } else {
+                    showToast(result, 'error');
+                }
+            } else {
+                // 取消收藏
+                let response = await fetch('/favorite/remove?userId=' + currentUserId + '&goodsId=' + goodsId, { method: 'POST' });
+                let result = await response.text();
+                if (result === '取消收藏成功') {
+                    icon.textContent = '❤️';
+                    showToast('取消收藏成功');
+                    let count = parseInt(document.getElementById('favoriteCount').textContent);
+                    document.getElementById('favoriteCount').textContent = count - 1;
+                } else {
+                    showToast(result, 'error');
+                }
+            }
+        }
+
+        async function buyGoods() {
+            if (!currentUserId) {
+                showToast('请先登录', 'error');
+                localStorage.setItem('redirectUrl', window.location.href);
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                let response = await fetch('/order/create?goodsId=' + goodsId + '&buyerId=' + currentUserId, { method: 'POST' });
+                let result = await response.text();
+                if (result.includes('成功')) {
+                    showToast('订单创建成功，正在跳转...');
+                    setTimeout(() => window.location.href = 'orders.html', 1500);
+                } else {
+                    showToast(result, 'error');
+                }
+            } catch (err) {
+                showToast('购买失败: ' + err.message, 'error');
+            }
+        }
+
+        loadGoodsDetail();
+        
+        if (currentUserId) {
+            document.getElementById('logoutBtn').style.display = 'inline';
+            document.getElementById('logoutBtn').onclick = () => {
+                localStorage.removeItem('userId');
+                localStorage.removeItem('username');
+                localStorage.removeItem('role');
+                localStorage.removeItem('redirectUrl');
+                window.location.href = 'login.html';
+            };
+        }
+    </script>
+</body>
+</html>

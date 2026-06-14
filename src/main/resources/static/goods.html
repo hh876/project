@@ -280,7 +280,7 @@
         }
 
         .search-bar input {
-            flex: 1;
+            flex: 2;
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -288,10 +288,60 @@
             transition: all 0.3s ease;
         }
 
+        .search-bar select {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
         .search-bar input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .goods-card .category-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #f0f4ff;
+            color: #667eea;
+            font-size: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .goods-card .image-box {
+            width: 100%;
+            height: 180px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .goods-card .image-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .goods-card .image-box .placeholder {
+            color: #ccc;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -309,6 +359,9 @@
 
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="搜索商品..." onkeyup="handleSearch(event)">
+            <select id="categorySelect" onchange="filterByCategory()">
+                <option value="0">全部分类</option>
+            </select>
             <button class="btn btn-primary" onclick="searchGoods()">搜索</button>
             <button class="btn btn-secondary" onclick="clearSearch()">重置</button>
         </div>
@@ -341,11 +394,21 @@
 
         function searchGoods() {
             const keyword = document.getElementById('searchInput').value.trim();
-            if (!keyword) {
+            const categoryId = document.getElementById('categorySelect').value;
+            
+            if (!keyword && categoryId == 0) {
                 loadGoodsList();
                 return;
             }
-            fetch(`/goods/search?keyword=${encodeURIComponent(keyword)}`)
+            
+            let url = '/goods/list';
+            if (categoryId > 0) {
+                url = `/goods/category?categoryId=${categoryId}`;
+            } else if (keyword) {
+                url = `/goods/search?keyword=${encodeURIComponent(keyword)}`;
+            }
+            
+            fetch(url)
             .then(res => res.json())
             .then(goodsList => {
                 renderGoodsList(goodsList);
@@ -355,8 +418,32 @@
             });
         }
 
+        function filterByCategory() {
+            const categoryId = document.getElementById('categorySelect').value;
+            const keyword = document.getElementById('searchInput').value.trim();
+            
+            if (keyword) {
+                searchGoods();
+                return;
+            }
+            
+            if (categoryId == 0) {
+                loadGoodsList();
+            } else {
+                fetch(`/goods/category?categoryId=${categoryId}`)
+                .then(res => res.json())
+                .then(goodsList => {
+                    renderGoodsList(goodsList);
+                })
+                .catch(err => {
+                    showToast('筛选失败：' + err.message, 'error');
+                });
+            }
+        }
+
         function clearSearch() {
             document.getElementById('searchInput').value = '';
+            document.getElementById('categorySelect').value = '0';
             loadGoodsList();
         }
 
@@ -368,6 +455,23 @@
             })
             .catch(err => {
                 showToast('加载失败：' + err.message, 'error');
+            });
+        }
+
+        function loadCategories() {
+            fetch("/goods/categories")
+            .then(res => res.json())
+            .then(categories => {
+                const select = document.getElementById('categorySelect');
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            })
+            .catch(err => {
+                console.log('加载分类失败：', err);
             });
         }
 
@@ -389,7 +493,11 @@
                 const card = document.createElement("div");
                 card.className = "goods-card";
                 card.innerHTML = `
-                    <div class="title">${goods.title}</div>
+                    <div class="image-box" onclick="viewGoodsDetail(${goods.id})">
+                        ${goods.imageUrl ? `<img src="${goods.imageUrl}" alt="${goods.title}">` : '<span class="placeholder">📷 暂无图片</span>'}
+                    </div>
+                    ${goods.categoryName ? `<span class="category-tag">${goods.categoryName}</span>` : ''}
+                    <div class="title" onclick="viewGoodsDetail(${goods.id})">${goods.title}</div>
                     <div class="description">${goods.description || '暂无描述'}</div>
                     <div class="price-row">
                         <div class="price">¥${goods.price}<span>元</span></div>
@@ -418,6 +526,10 @@
             setTimeout(() => {
                 location.href = 'login.html';
             }, 1000);
+        }
+
+        function viewGoodsDetail(goodsId) {
+            window.location.href = 'goods-detail.html?id=' + goodsId;
         }
 
         function openModal(goodsId, title, price) {
@@ -488,6 +600,7 @@
             }
 
             loadGoodsList();
+            loadCategories();
         }
 
         function escapeHtml(text) {

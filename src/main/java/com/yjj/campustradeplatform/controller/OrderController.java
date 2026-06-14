@@ -46,14 +46,17 @@ public class OrderController {
 
         // 3. 校验不能购买自己的商品
         if (goods.getUserId() == null) {
-            return "商品信息异常";
+            return "商品信息异常（卖家ID为空）";
         }
         if (goods.getUserId().equals(buyerId)) {
             return "不能购买自己发布的商品";
         }
 
         // 4. 创建订单（业务层加事务）
-        orderService.createOrder(buyerId, goodsId);
+        String orderNo = orderService.createOrder(buyerId, goodsId);
+        if (orderNo == null) {
+            return "订单创建失败";
+        }
         return "success";
     }
 
@@ -62,13 +65,28 @@ public class OrderController {
         return orderService.getOrderListByBuyerId(userId);
     }
 
-    @GetMapping("/sales")
-    public java.util.List<TradeOrder> getSalesList(@RequestParam Long userId) {
+    @GetMapping("/seller")
+    public java.util.List<TradeOrder> getSellerOrders(@RequestParam Long userId) {
         return orderService.getOrderListBySellerId(userId);
     }
 
+    @GetMapping("/detail")
+    public TradeOrder getOrderDetail(@RequestParam String orderNo) {
+        return orderService.getOrderByOrderNo(orderNo);
+    }
+
     @PostMapping("/confirm")
-    public String confirmOrder(@RequestParam Long orderId) {
-        return orderService.confirmOrder(orderId) ? "success" : "确认失败";
+    public String confirmOrder(@RequestParam String orderNo) {
+        return orderService.confirmOrder(orderNo) ? "订单已完成" : "确认失败";
+    }
+
+    @PostMapping("/pay")
+    public String payOrder(@RequestParam String orderNo) {
+        return orderService.payOrder(orderNo) ? "支付成功" : "支付失败";
+    }
+
+    @PostMapping("/cancel")
+    public String cancelOrder(@RequestParam String orderNo) {
+        return orderService.cancelOrder(orderNo) ? "订单已取消" : "取消失败";
     }
 }

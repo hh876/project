@@ -38,4 +38,24 @@ public class GoodsServiceImpl implements GoodsService {
     public List<Goods> getGoodsByUserId(Long userId) {
         return goodsMapper.selectByUserId(userId);
     }
+
+    @Override
+    public List<Goods> getGoodsByCategory(Long categoryId) {
+        return goodsMapper.selectByCategoryId(categoryId);
+    }
+
+    @Override
+    public List<Goods> advancedSearch(String keyword, Long categoryId, Double minPrice, Double maxPrice, String sortBy, String sortOrder) {
+        return goodsMapper.advancedSearch(keyword, categoryId, minPrice, maxPrice, sortBy, sortOrder);
+    }
+
+    @Override
+    public boolean updateGoods(Goods goods) {
+        return goodsMapper.update(goods) > 0;
+    }
+
+    @Override
+    public boolean deleteGoods(Long id) {
+        return goodsMapper.deleteById(id) > 0;
+    }
 }

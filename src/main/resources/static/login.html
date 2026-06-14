@@ -379,11 +379,11 @@
         </div>
 
         <div class="social-btns">
-            <button class="social-btn">
+            <button class="social-btn" onclick="phoneLogin()">
                 <span>📱</span>
                 <span>手机号登录</span>
             </button>
-            <button class="social-btn">
+            <button class="social-btn" onclick="campusLogin()">
                 <span>👤</span>
                 <span>校园账号</span>
             </button>
@@ -491,8 +491,14 @@
                     };
                     showToast(`登录成功！身份：${roleNames[data.role] || '未知'}`, 'success');
                     setTimeout(() => {
-                        location.href = "goods.html";
-                    }, 1500);
+                        const redirectUrl = localStorage.getItem('redirectUrl');
+                        if (redirectUrl && redirectUrl.indexOf('.html') > -1) {
+                            localStorage.removeItem('redirectUrl');
+                            window.location.href = redirectUrl;
+                        } else {
+                            window.location.href = "goods.html";
+                        }
+                    }, 500);
                 } else {
                     showToast(data.message || '登录失败', 'error');
                 }
@@ -500,6 +506,14 @@
             .catch(err => {
                 showToast('登录失败：' + err.message, 'error');
             });
+        }
+
+        function phoneLogin() {
+            showToast('手机号登录功能开发中...', 'error');
+        }
+
+        function campusLogin() {
+            showToast('校园账号登录功能开发中...', 'error');
         }
     </script>
 </body>

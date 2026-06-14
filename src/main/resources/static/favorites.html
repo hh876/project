@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的收藏 - 校园闲置交易平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 30px; color: white; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: bold; }
+        .nav { display: flex; gap: 20px; }
+        .nav a { color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; }
+        .nav a:hover { background: rgba(255,255,255,0.2); }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .page-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #333; }
+        
+        .goods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .goods-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); transition: all 0.3s; }
+        .goods-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        
+        .image-box { width: 100%; height: 180px; background: #f8f9fa; border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .image-box img { max-width: 100%; max-height: 100%; object-fit: cover; }
+        .image-box .placeholder { color: #ccc; font-size: 32px; }
+        
+        .category-tag { display: inline-block; padding: 3px 10px; background: #f0f4ff; color: #667eea; font-size: 12px; border-radius: 12px; margin-bottom: 8px; }
+        .title { font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #333; cursor: pointer; }
+        .title:hover { color: #667eea; }
+        .description { font-size: 14px; color: #666; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .price { font-size: 20px; font-weight: bold; color: #e74c3c; }
+        .remove-btn { padding: 6px 15px; background: #f0f0f0; color: #666; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .remove-btn:hover { background: #fee; color: #e74c3c; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 15px; }
+        .empty-icon { font-size: 64px; margin-bottom: 20px; }
+        .empty-text { color: #999; font-size: 16px; margin-bottom: 20px; }
+        .btn { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; }
+        
+        .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: white; font-size: 14px; z-index: 9999; }
+        .toast-success { background: #27ae60; }
+        .toast-error { background: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🎓 校园闲置交易平台</div>
+            <div class="nav">
+                <a href="goods.html">首页</a>
+                <a href="publish.html">发布商品</a>
+                <a href="orders.html">我的订单</a>
+                <a href="profile.html">个人中心</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">❤️ 我的收藏</h1>
+        <div id="favoritesList" class="goods-grid"></div>
+    </div>
+
+    <script>
+        let userId = localStorage.getItem('userId');
+
+        function getCookie(name) {
+            let arr = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)(;|$)'));
+            return arr ? arr[2] : null;
+        }
+
+        function showToast(message, type = 'success') {
+            let toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        async function loadFavorites() {
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                let response = await fetch('/favorite/list?userId=' + userId);
+                let favorites = await response.json();
+
+                let container = document.getElementById('favoritesList');
+
+                if (!favorites || favorites.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-icon">💔</div>
+                            <div class="empty-text">暂无收藏商品</div>
+                            <a href="goods.html" class="btn">去逛逛</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = favorites.map(goods => `
+                    <div class="goods-card">
+                        <div class="image-box" onclick="viewGoods(${goods.id})">
+                            ${goods.imageUrl ? `<img src="${goods.imageUrl}" alt="${goods.title}">` : '<span class="placeholder">📷</span>'}
+                        </div>
+                        ${goods.categoryName ? `<span class="category-tag">${goods.categoryName}</span>` : ''}
+                        <div class="title" onclick="viewGoods(${goods.id})">${goods.title}</div>
+                        <div class="description">${goods.description || '暂无描述'}</div>
+                        <div class="price-row">
+                            <span class="price">¥${goods.price}</span>
+                            <button class="remove-btn" onclick="removeFavorite(${goods.id}, event)">取消收藏</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showToast('加载失败: ' + err.message, 'error');
+            }
+        }
+
+        function viewGoods(goodsId) {
+            window.location.href = 'goods-detail.html?id=' + goodsId;
+        }
+
+        async function removeFavorite(goodsId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('确定要取消收藏吗？')) return;
+
+            try {
+                let response = await fetch('/favorite/remove?userId=' + userId + '&goodsId=' + goodsId, {
+                    method: 'POST'
+                });
+                let result = await response.text();
+                if (result === '取消收藏成功') {
+                    showToast('已取消收藏');
+                    loadFavorites();
+                } else {
+                    showToast(result, 'error');
+                }
+            } catch (err) {
+                showToast('操作失败: ' + err.message, 'error');
+            }
+        }
+
+        loadFavorites();
+    </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天 - 校园闲置交易平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 30px; color: white; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: bold; }
+        .nav { display: flex; gap: 20px; }
+        .nav a { color: white; text-decoration: none; padding: 5px 10px; border-radius: 5px; }
+        .nav a:hover { background: rgba(255,255,255,0.2); }
+
+        .container { max-width: 1000px; margin: 30px auto; display: flex; gap: 20px; }
+        
+        /* 左侧联系人列表 */
+        .contact-list { width: 350px; background: white; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .contact-header { padding: 20px; border-bottom: 1px solid #eee; }
+        .contact-header h3 { font-size: 16px; font-weight: bold; }
+        .contact-item { display: flex; gap: 15px; padding: 15px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.3s; }
+        .contact-item:hover { background: #f8f9fa; }
+        .contact-item.active { background: #f0f4ff; }
+        .contact-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+        .contact-info { flex: 1; }
+        .contact-name { font-weight: bold; margin-bottom: 5px; }
+        .contact-lastmsg { font-size: 13px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .contact-time { font-size: 12px; color: #999; }
+        .unread-dot { width: 8px; height: 8px; background: #e74c3c; border-radius: 50%; margin-top: 5px; }
+        
+        /* 右侧聊天区域 */
+        .chat-area { flex: 1; background: white; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
+        .chat-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; }
+        .chat-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+        .chat-name { font-weight: bold; }
+        .chat-status { font-size: 12px; color: #27ae60; }
+        
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; }
+        .message-item { margin-bottom: 20px; }
+        .message-item.self { text-align: right; }
+        .message-bubble { display: inline-block; max-width: 70%; padding: 12px 16px; border-radius: 15px; }
+        .message-item .message-bubble { background: #f0f0f0; color: #333; border-bottom-left-radius: 5px; }
+        .message-item.self .message-bubble { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom-right-radius: 5px; }
+        .message-time { font-size: 12px; color: #999; margin-top: 5px; }
+        
+        .chat-input { padding: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .chat-input input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
+        .chat-input input:focus { border-color: #667eea; }
+        .send-btn { padding: 12px 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; cursor: pointer; }
+        .send-btn:hover { opacity: 0.9; }
+        
+        .empty-state { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #999; }
+        .empty-icon { font-size: 64px; margin-bottom: 20px; }
+        
+        .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: white; font-size: 14px; z-index: 9999; }
+        .toast-success { background: #27ae60; }
+        .toast-error { background: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🎓 校园闲置交易平台</div>
+            <div class="nav">
+                <a href="goods.html">首页</a>
+                <a href="publish.html">发布商品</a>
+                <a href="orders.html">我的订单</a>
+                <a href="profile.html">个人中心</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="contact-list">
+            <div class="contact-header">
+                <h3>💬 消息列表</h3>
+            </div>
+            <div id="contactList">
+                <div class="empty-state" style="padding:40px;">
+                    <div>暂无消息</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-area">
+            <div class="chat-header" id="chatHeader" style="display:none;">
+                <div class="chat-avatar" id="targetAvatar">👤</div>
+                <div>
+                    <div class="chat-name" id="targetName"></div>
+                    <div class="chat-status">在线</div>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state">
+                    <div class="empty-icon">💬</div>
+                    <div>选择一个联系人开始聊天</div>
+                </div>
+            </div>
+            
+            <div class="chat-input" id="chatInput" style="display:none;">
+                <input type="text" id="messageInput" placeholder="输入消息..." onkeyup="sendOnEnter(event)">
+                <button class="send-btn" onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userId = localStorage.getItem('userId');
+        let targetUserId = null;
+        let targetNickname = null;
+
+        function getCookie(name) {
+            let arr = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)(;|$)'));
+            return arr ? arr[2] : null;
+        }
+
+        function showToast(message, type = 'success') {
+            let toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        async function loadContacts() {
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                let response = await fetch('/chat/contacts?userId=' + userId);
+                let contacts = await response.json();
+
+                let container = document.getElementById('contactList');
+                if (!contacts || contacts.length === 0) {
+                    container.innerHTML = '<div class="empty-state" style="padding:40px;"><div>暂无消息</div></div>';
+                    return;
+                }
+
+                container.innerHTML = contacts.map(c => `
+                    <div class="contact-item" onclick="startChat(${c.id}, '${c.nickname || c.username}')">
+                        <div class="contact-avatar">${c.nickname ? c.nickname.charAt(0) : '👤'}</div>
+                        <div class="contact-info">
+                            <div class="contact-name">${c.nickname || c.username}</div>
+                            <div class="contact-lastmsg">${c.lastMessage || '暂无消息'}</div>
+                        </div>
+                        <div>
+                            <div class="contact-time">${formatTime(c.lastTime)}</div>
+                            ${c.unreadCount > 0 ? '<div class="unread-dot"></div>' : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showToast('加载失败: ' + err.message, 'error');
+            }
+        }
+
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            let date = new Date(timeStr);
+            let now = new Date();
+            let diff = now - date;
+            
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff/60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff/3600000) + '小时前';
+            return date.getMonth() + 1 + '/' + date.getDate();
+        }
+
+        async function startChat(targetId, nickname) {
+            targetUserId = targetId;
+            targetNickname = nickname;
+
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('chatInput').style.display = 'flex';
+            document.getElementById('chatMessages').innerHTML = '';
+            
+            document.getElementById('targetAvatar').textContent = nickname.charAt(0);
+            document.getElementById('targetName').textContent = nickname;
+
+            document.querySelectorAll('.contact-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+
+            await loadMessages();
+            await markAsRead();
+        }
+
+        async function loadMessages() {
+            try {
+                let response = await fetch('/chat/messages?userId=' + userId + '&targetId=' + targetUserId);
+                let messages = await response.json();
+
+                let container = document.getElementById('chatMessages');
+                container.innerHTML = messages.map(msg => `
+                    <div class="message-item ${msg.senderId == userId ? 'self' : ''}">
+                        <div class="message-bubble">${msg.content}</div>
+                        <div class="message-time">${formatTime(msg.createTime)}</div>
+                    </div>
+                `).join('');
+                
+                container.scrollTop = container.scrollHeight;
+            } catch (err) {
+                showToast('加载消息失败: ' + err.message, 'error');
+            }
+        }
+
+        function sendOnEnter(event) {
+            if (event.keyCode === 13) {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            let content = document.getElementById('messageInput').value.trim();
+            if (!content) return;
+
+            try {
+                let response = await fetch('/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        senderId: parseInt(userId),
+                        receiverId: targetUserId,
+                        content: content
+                    })
+                });
+                
+                let result = await response.text();
+                if (result === 'success') {
+                    document.getElementById('messageInput').value = '';
+                    await loadMessages();
+                } else {
+                    showToast('发送失败: ' + result, 'error');
+                }
+            } catch (err) {
+                showToast('发送失败: ' + err.message, 'error');
+            }
+        }
+
+        async function markAsRead() {
+            try {
+                await fetch('/chat/read?userId=' + userId + '&targetId=' + targetUserId, { method: 'POST' });
+                loadContacts();
+            } catch (err) {
+                console.log('标记已读失败:', err);
+            }
+        }
+
+        loadContacts();
+    </script>
+</body>
+</html>

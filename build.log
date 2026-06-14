@@ -1,0 +1,20 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.yjj:campus-trade-platform >--------------------
+[INFO] Building campus-trade-platform 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] The artifact mysql:mysql-connector-java:jar:8.0.33 has been relocated to com.mysql:mysql-connector-j:jar:8.0.33: MySQL Connector/J artifacts moved to reverse-DNS compliant Maven 2+ coordinates.
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ campus-trade-platform ---
+[INFO] Deleting D:\Users\HUAWEI\Desktop\campus-trade-platform\target
+[INFO] 
+[INFO] --- resources:3.2.0:resources (default-resources) @ campus-trade-platform ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] Copying 1 resource
+[INFO] Copying 14 resources
+[INFO] 
+[INFO] --- compiler:3.10.1:compile (default-compile) @ campus-trade-platform ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 36 source files to D:\Users\HUAWEI\Desktop\campus-trade-platform\target\classes

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的订单 - 校园闲置交易平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 30px; color: white; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-size: 20px; font-weight: bold; }
+        .nav { display: flex; gap: 20px; }
+        .nav a { color: white; text-decoration: none; padding: 5px 10px; }
+        .nav a:hover { background: rgba(255,255,255,0.2); border-radius: 5px; }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 25px; border: none; background: white; border-radius: 20px; cursor: pointer; font-size: 14px; }
+        .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+
+        .order-card { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 20px; }
+        .card-header { padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .order-no { font-size: 14px; color: #666; }
+        .status { padding: 3px 10px; border-radius: 15px; font-size: 12px; }
+        .status-0 { background: #fff3cd; color: #856404; }
+        .status-1 { background: #d4edda; color: #155724; }
+        .status-2 { background: #f8d7da; color: #721c24; }
+        .status-3 { background: #d1ecf1; color: #0c5460; }
+
+        .card-body { padding: 15px 20px; }
+        .goods-item { display: flex; gap: 15px; }
+        .goods-image { width: 80px; height: 80px; background: #f8f8f8; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .goods-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .goods-info { flex: 1; }
+        .goods-title { font-size: 15px; font-weight: bold; margin-bottom: 5px; }
+        .goods-price { color: #e74c3c; font-weight: bold; }
+
+        .card-footer { padding: 15px 20px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .total-price { font-size: 16px; color: #e74c3c; font-weight: bold; }
+        .actions { display: flex; gap: 10px; }
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-outline { border: 1px solid #667eea; color: #667eea; background: white; }
+
+        .empty-state { text-align: center; padding: 60px 0; color: #999; }
+        .empty-icon { font-size: 48px; margin-bottom: 15px; }
+
+        .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: white; font-size: 14px; z-index: 9999; }
+        .toast-success { background: #27ae60; }
+        .toast-error { background: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🎓 校园闲置交易平台</div>
+            <div class="nav">
+                <a href="goods.html">首页</a>
+                <a href="publish.html">发布商品</a>
+                <a href="orders.html">我的订单</a>
+                <a href="profile.html">个人中心</a>
+                <a href="login.html" id="logoutBtn" style="display:none;">退出登录</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="loadOrders(0)">全部</button>
+            <button class="tab" onclick="loadOrders(0)">待支付</button>
+            <button class="tab" onclick="loadOrders(1)">已支付</button>
+            <button class="tab" onclick="loadOrders(3)">已完成</button>
+            <button class="tab" onclick="loadOrders(2)">已取消</button>
+        </div>
+
+        <div id="orderList">
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <div>暂无订单</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = localStorage.getItem('userId');
+
+        function getCookie(name) {
+            let arr = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)(;|$)'));
+            return arr ? arr[2] : null;
+        }
+
+        function showToast(message, type = 'success') {
+            let toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        function getStatusText(status) {
+            const texts = ['待支付', '已支付', '已取消', '已完成'];
+            return texts[status] || '未知状态';
+        }
+
+        function getStatusClass(status) {
+            return 'status-' + status;
+        }
+
+        async function loadOrders(status) {
+            if (!currentUserId) {
+                showToast('请先登录', 'error');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                let url = '/order/list?userId=' + currentUserId;
+                if (status !== undefined && status !== 0) {
+                    url += '&status=' + status;
+                }
+                
+                let response = await fetch(url);
+                let orders = await response.json();
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                if (!orders || orders.length === 0) {
+                    document.getElementById('orderList').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📦</div>
+                            <div>暂无订单</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = orders.map(order => `
+                    <div class="order-card">
+                        <div class="card-header">
+                            <span class="order-no">订单编号: ${order.orderNo}</span>
+                            <span class="status ${getStatusClass(order.status)}">${getStatusText(order.status)}</span>
+                        </div>
+                        <div class="card-body" onclick="viewOrder('${order.orderNo}')" style="cursor:pointer;">
+                            <div class="goods-item">
+                                <div class="goods-image" id="goodsImg_${order.id}">📷</div>
+                                <div class="goods-info">
+                                    <div class="goods-title" id="goodsTitle_${order.id}">加载中...</div>
+                                    <div class="goods-price">¥${order.price}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="total-price">实付: ¥${order.price}</div>
+                            <div class="actions">
+                                ${renderActions(order)}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('orderList').innerHTML = html;
+                
+                // 加载商品详情
+                for (let order of orders) {
+                    loadGoodsInfo(order.goodsId, order.id);
+                }
+            } catch (err) {
+                showToast('加载订单失败: ' + err.message, 'error');
+            }
+        }
+
+        async function loadGoodsInfo(goodsId, orderId) {
+            try {
+                let response = await fetch('/goods/detail?id=' + goodsId);
+                let goods = await response.json();
+                document.getElementById('goodsTitle_' + orderId).textContent = goods.title;
+                if (goods.imageUrl) {
+                    document.getElementById('goodsImg_' + orderId).innerHTML = `<img src="${goods.imageUrl}" alt="${goods.title}">`;
+                }
+            } catch (err) {
+                console.log('加载商品信息失败:', err);
+            }
+        }
+
+        function renderActions(order) {
+            let actions = [];
+            
+            if (order.status === 0) {
+                actions.push(`<button class="btn btn-primary" onclick="event.stopPropagation(); payOrder('${order.orderNo}')">立即支付</button>`);
+                actions.push(`<button class="btn btn-danger" onclick="event.stopPropagation(); cancelOrder('${order.orderNo}')">取消订单</button>`);
+            } else if (order.status === 1) {
+                actions.push(`<button class="btn btn-success" onclick="event.stopPropagation(); confirmOrder('${order.orderNo}')">确认收货</button>`);
+            } else if (order.status === 3) {
+                actions.push(`<button class="btn btn-outline" onclick="event.stopPropagation(); viewOrder('${order.orderNo}')">查看详情</button>`);
+            }
+            
+            return actions.join('');
+        }
+
+        function viewOrder(orderNo) {
+            window.location.href = 'order-detail.html?orderNo=' + orderNo;
+        }
+
+        async function payOrder(orderNo) {
+            try {
+                let response = await fetch('/order/pay?orderNo=' + orderNo, { method: 'POST' });
+                let result = await response.text();
+                if (result === '支付成功') {
+                    showToast('支付成功');
+                    loadOrders(0);
+                } else {
+                    showToast(result, 'error');
+                }
+            } catch (err) {
+                showToast('支付失败: ' + err.message, 'error');
+            }
+        }
+
+        async function cancelOrder(orderNo) {
+            if (!confirm('确定要取消订单吗？')) return;
+            
+            try {
+                let response = await fetch('/order/cancel?orderNo=' + orderNo, { method: 'POST' });
+                let result = await response.text();
+                if (result === '订单已取消') {
+                    showToast('订单已取消');
+                    loadOrders(0);
+                } else {
+                    showToast(result, 'error');
+                }
+            } catch (err) {
+                showToast('取消订单失败: ' + err.message, 'error');
+            }
+        }
+
+        async function confirmOrder(orderNo) {
+            if (!confirm('确定已收到商品吗？')) return;
+            
+            try {
+                let response = await fetch('/order/confirm?orderNo=' + orderNo, { method: 'POST' });
+                let result = await response.text();
+                if (result === '订单已完成') {
+                    showToast('订单已完成');
+                    loadOrders(0);
+                } else {
+                    showToast(result, 'error');
+                }
+            } catch (err) {
+                showToast('确认收货失败: ' + err.message, 'error');
+            }
+        }
+
+        if (currentUserId) {
+            loadOrders(0);
+            document.getElementById('logoutBtn').style.display = 'inline';
+            document.getElementById('logoutBtn').onclick = () => {
+                localStorage.removeItem('userId');
+                localStorage.removeItem('username');
+                localStorage.removeItem('role');
+                window.location.href = 'login.html';
+            };
+        } else {
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

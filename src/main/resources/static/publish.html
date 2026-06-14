@@ -230,6 +230,30 @@
             <div class="form-tips">请输入合理的价格，支持小数</div>
         </div>
 
+        <div class="form-group">
+            <label>商品分类</label>
+            <select id="category" style="width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; background: #fafafa; outline: none;">
+                <option value="0">请选择分类</option>
+            </select>
+            <div class="form-tips">选择商品所属分类</div>
+        </div>
+
+        <div class="form-group">
+            <label>商品图片（可选）</label>
+            <div id="upload-area" style="border: 2px dashed #ddd; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <div id="upload-icon" style="font-size: 48px; margin-bottom: 15px;">📷</div>
+                <div id="upload-text" style="color: #666; font-size: 15px;">点击或拖拽上传图片</div>
+                <div style="color: #999; font-size: 13px; margin-top: 8px;">支持 JPG、PNG、GIF 格式</div>
+            </div>
+            <div id="preview-container" style="display: none; margin-top: 15px;">
+                <img id="preview-image" style="max-width: 200px; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <button onclick="removeImage()" style="margin-left: 15px; padding: 8px 16px; background: #f5f5f5; border: none; border-radius: 8px; color: #666; cursor: pointer;">移除图片</button>
+            </div>
+            <input type="hidden" id="imageUrl">
+            <div class="form-tips">上传本地图片，让商品更吸引人</div>
+        </div>
+
         <button class="btn btn-primary" onclick="publish()">发布商品</button>
         <button class="btn btn-secondary" onclick="resetForm()">重置表单</button>
     </div>
@@ -253,6 +277,99 @@
             document.getElementById('title').value = '';
             document.getElementById('desc').value = '';
             document.getElementById('price').value = '';
+            document.getElementById('category').value = '0';
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('upload-area').style.borderColor = '#ddd';
+            document.getElementById('upload-text').textContent = '点击或拖拽上传图片';
+            document.getElementById('upload-icon').textContent = '📷';
+        }
+
+        function initUpload() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('fileInput');
+            
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadFile(file);
+                }
+            });
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#667eea';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ddd';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ddd';
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    uploadFile(file);
+                } else {
+                    showToast('请上传图片文件', 'error');
+                }
+            });
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('imageUrl').value = data.url;
+                    document.getElementById('preview-image').src = data.url;
+                    document.getElementById('preview-container').style.display = 'block';
+                    document.getElementById('upload-area').style.borderColor = '#27ae60';
+                    document.getElementById('upload-text').textContent = '上传成功！';
+                    document.getElementById('upload-icon').textContent = '✅';
+                } else {
+                    showToast('上传失败：' + data.message, 'error');
+                }
+            })
+            .catch(err => {
+                showToast('上传失败：' + err.message, 'error');
+            });
+        }
+
+        function removeImage() {
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('upload-area').style.borderColor = '#ddd';
+            document.getElementById('upload-text').textContent = '点击或拖拽上传图片';
+            document.getElementById('upload-icon').textContent = '📷';
+        }
+
+        function loadCategories() {
+            fetch("/goods/categories")
+            .then(res => res.json())
+            .then(categories => {
+                const select = document.getElementById('category');
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            })
+            .catch(err => {
+                console.log('加载分类失败：', err);
+            });
         }
 
         function publish() {
@@ -273,6 +390,8 @@
             const title = document.getElementById('title').value.trim();
             const description = document.getElementById('desc').value.trim();
             const price = document.getElementById('price').value.trim();
+            const categoryId = document.getElementById('category').value;
+            const imageUrl = document.getElementById('imageUrl').value.trim();
 
             if (!title) {
                 showToast('请输入商品标题', 'error');
@@ -286,6 +405,10 @@
                 showToast('请输入有效的价格', 'error');
                 return;
             }
+            if (categoryId == 0) {
+                showToast('请选择商品分类', 'error');
+                return;
+            }
 
             fetch("/goods/publish", {
                 method: "POST",
@@ -294,7 +417,9 @@
                     userId: parseInt(userId),
                     title: title,
                     description: description,
-                    price: parseFloat(price)
+                    price: parseFloat(price),
+                    categoryId: parseInt(categoryId),
+                    imageUrl: imageUrl
                 })
             })
             .then(res => res.text())
@@ -311,6 +436,11 @@
             .catch(err => {
                 showToast('发布失败：' + err.message, 'error');
             });
+        }
+
+        window.onload = function() {
+            loadCategories();
+            initUpload();
         }
     </script>
 </body>

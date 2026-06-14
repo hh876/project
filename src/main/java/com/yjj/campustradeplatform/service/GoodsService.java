@@ -9,4 +9,8 @@ public interface GoodsService {
     boolean publishGoods(Goods goods);
     List<Goods> searchGoods(String keyword);
     List<Goods> getGoodsByUserId(Long userId);
+    List<Goods> getGoodsByCategory(Long categoryId);
+    List<Goods> advancedSearch(String keyword, Long categoryId, Double minPrice, Double maxPrice, String sortBy, String sortOrder);
+    boolean updateGoods(Goods goods);
+    boolean deleteGoods(Long id);
 }

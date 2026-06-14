@@ -5,12 +5,19 @@ import com.yjj.campustradeplatform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+    @GetMapping("/")
+    public void redirectToLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/login.html");
+    }
     @Autowired
     private UserService userService;
 

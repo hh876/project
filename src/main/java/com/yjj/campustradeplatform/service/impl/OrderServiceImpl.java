@@ -88,14 +88,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public TradeOrder getOrderByOrderNo(String orderNo) {
+        return orderMapper.selectByOrderNo(orderNo);
+    }
+
+    @Override
     @Transactional
-    public boolean confirmOrder(Long orderId) {
-        TradeOrder order = orderMapper.selectById(orderId);
+    public boolean cancelOrder(String orderNo) {
+        TradeOrder order = orderMapper.selectByOrderNo(orderNo);
         if (order == null || order.getStatus() != 0) {
             return false;
         }
-        orderMapper.updateStatusById(orderId, 1);
-        goodsMapper.updateStatus(order.getGoodsId(), 1);
+        orderMapper.updateStatus(orderNo, 2);
         return true;
     }
 }
